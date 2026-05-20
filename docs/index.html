@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Bot Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d1117; color: #e6edf3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh; padding: 24px 16px;
+  }
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; flex-wrap: wrap; gap: 8px;
+  }
+  .header h1 { font-size: 1.5rem; font-weight: 700; }
+  .header h1 span { color: #f0b429; }
+  .updated { font-size: 0.75rem; color: #8b949e; }
+  .grid { display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .card {
+    background: #161b22; border: 1px solid #30363d;
+    border-radius: 12px; padding: 20px;
+  }
+  .card-title {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .08em; color: #8b949e; margin-bottom: 14px;
+  }
+  .big { font-size: 2rem; font-weight: 700; }
+  .sub { font-size: 0.85rem; color: #8b949e; margin-top: 4px; }
+  .green { color: #3fb950; }
+  .red   { color: #f85149; }
+  .yellow{ color: #f0b429; }
+  .blue  { color: #58a6ff; }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 600;
+  }
+  .badge-long  { background: #1a3a2a; color: #3fb950; }
+  .badge-short { background: #3a1a1a; color: #f85149; }
+  .badge-none  { background: #1e2430; color: #8b949e; }
+  .badge-signal-long  { background: #1a3a2a; color: #3fb950; border: 1px solid #3fb950; }
+  .badge-signal-short { background: #3a1a1a; color: #f85149; border: 1px solid #f85149; }
+  .badge-signal-wait  { background: #1e2430; color: #8b949e; border: 1px solid #30363d; }
+
+  .indicator-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid #21262d;
+  }
+  .indicator-row:last-child { border-bottom: none; }
+  .indicator-label { font-size: 0.82rem; color: #8b949e; }
+  .indicator-value { font-size: 0.9rem; font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th { text-align: left; color: #8b949e; font-weight: 500;
+       padding: 6px 8px; border-bottom: 1px solid #21262d; }
+  td { padding: 8px 8px; border-bottom: 1px solid #161b22; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1c2129; }
+
+  .no-pos {
+    text-align: center; padding: 32px; color: #8b949e; font-size: 0.9rem;
+  }
+  .dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: #3fb950;
+    animation: pulse 2s infinite; margin-right: 6px;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+  .param-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  .param-item {
+    background: #0d1117; border-radius: 8px; padding: 10px 12px;
+  }
+  .param-item .label { font-size: 0.7rem; color: #8b949e; }
+  .param-item .value { font-size: 1rem; font-weight: 700; margin-top: 2px; }
+
+  .error { text-align: center; padding: 60px; color: #f85149; }
+  .loading { text-align: center; padding: 60px; color: #8b949e; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🥇 Gold Bot <span>Dashboard</span></h1>
+  <div class="updated"><span class="dot"></span>Auto-refresh every 5 min · Last: <span id="updated">—</span></div>
+</div>
+
+<div id="root"><div class="loading">Loading data…</div></div>
+
+<script>
+const STATUS_URL = "./status.json";
+
+function fmt(n, dec=2) {
+  if (n == null) return "—";
+  return Number(n).toLocaleString("en-US", {minimumFractionDigits: dec, maximumFractionDigits: dec});
+}
+function pct(n) {
+  if (n == null) return "—";
+  const cls = n >= 0 ? "green" : "red";
+  const sign = n >= 0 ? "+" : "";
+  return `<span class="${cls}">${sign}${fmt(n)}%</span>`;
+}
+function side_badge(side) {
+  if (!side) return "";
+  const s = side.toLowerCase();
+  if (s === "buy" || s === "long") return `<span class="badge badge-long">LONG</span>`;
+  return `<span class="badge badge-short">SHORT</span>`;
+}
+function format_time(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString("th-TH", {timeZone:"Asia/Bangkok",
+    month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"});
+}
+
+function render(d) {
+  document.getElementById("updated").textContent = d.updated || "—";
+  const a = d.account || {};
+  const p = d.position;
+  const s = d.signal || {};
+  const params = d.params || {};
+  const orders = d.recent_orders || [];
+
+  // signal badge
+  let sigBadge, sigLabel;
+  if (s.long_entry) {
+    sigBadge = `<span class="badge badge-signal-long">▲ LONG SIGNAL</span>`;
+    sigLabel = "Buy signal — entering long";
+  } else if (s.short_entry) {
+    sigBadge = `<span class="badge badge-signal-short">▼ SHORT SIGNAL</span>`;
+    sigLabel = "Sell signal — entering short";
+  } else {
+    sigBadge = `<span class="badge badge-signal-wait">● WAITING</span>`;
+    sigLabel = "No signal yet";
+  }
+
+  // position card
+  let posCard;
+  if (p) {
+    const plCls = p.unrealized_pl >= 0 ? "green" : "red";
+    const sign  = p.unrealized_pl >= 0 ? "+" : "";
+    posCard = `
+      <div class="card">
+        <div class="card-title">Open Position</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          ${side_badge(p.side)}
+          <span style="font-weight:700;font-size:1.1rem">${p.symbol}</span>
+          <span style="color:#8b949e;font-size:0.85rem">${fmt(p.qty,0)} shares</span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">Entry Price</span>
+          <span class="indicator-value">$${fmt(p.entry_price)}</span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">Current Price</span>
+          <span class="indicator-value">$${fmt(p.current_price)}</span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">Unrealized P&L</span>
+          <span class="indicator-value ${plCls}">${sign}$${fmt(Math.abs(p.unrealized_pl))} (${sign}${fmt(p.unrealized_plpc)}%)</span>
+        </div>
+      </div>`;
+  } else {
+    posCard = `
+      <div class="card">
+        <div class="card-title">Open Position</div>
+        <div class="no-pos">No open position<br><span style="font-size:0.75rem">Waiting for signal</span></div>
+      </div>`;
+  }
+
+  // recent orders
+  let orderRows = orders.length === 0
+    ? `<tr><td colspan="5" style="text-align:center;color:#8b949e;padding:20px">No orders yet</td></tr>`
+    : orders.map(o => {
+        const side = (o.side||"").toLowerCase();
+        const cls  = (side==="buy") ? "green" : "red";
+        const fp   = o.filled_price ? `$${fmt(o.filled_price)}` : "—";
+        return `<tr>
+          <td><span class="${cls}" style="font-weight:600">${(o.side||"").toUpperCase()}</span></td>
+          <td>${fmt(o.qty,0)}</td>
+          <td>${fp}</td>
+          <td>${format_time(o.filled_at)}</td>
+          <td style="color:#8b949e">${o.status||"—"}</td>
+        </tr>`;
+      }).join("");
+
+  document.getElementById("root").innerHTML = `
+    <div class="grid">
+
+      <!-- Account -->
+      <div class="card">
+        <div class="card-title">Account (Paper)</div>
+        <div class="big">$${fmt(a.equity)}</div>
+        <div class="sub">Equity</div>
+        <div style="margin-top:14px" class="indicator-row">
+          <span class="indicator-label">P&L Today</span>
+          <span class="indicator-value">${pct(a.pnl_today_pct)} &nbsp; $${fmt(a.pnl_today)}</span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">Buying Power</span>
+          <span class="indicator-value">$${fmt(a.buying_power)}</span>
+        </div>
+      </div>
+
+      <!-- Position -->
+      ${posCard}
+
+      <!-- Signal -->
+      <div class="card">
+        <div class="card-title">Current Signal · ${d.symbol||"GLD"} ${d.timeframe||"H1"}</div>
+        <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
+          ${sigBadge}
+          <span style="font-size:0.8rem;color:#8b949e">${sigLabel}</span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">Price</span>
+          <span class="indicator-value">$${fmt(s.price)}</span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">BB Lower / Mid / Upper</span>
+          <span class="indicator-value" style="font-size:0.8rem">
+            <span class="green">$${fmt(s.bb_lower)}</span> /
+            $${fmt(s.bb_mid)} /
+            <span class="red">$${fmt(s.bb_upper)}</span>
+          </span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">EMA 200</span>
+          <span class="indicator-value ${s.price > s.ema200 ? 'green':'red'}">$${fmt(s.ema200)}</span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">RSI 14</span>
+          <span class="indicator-value ${s.rsi<40?'green':s.rsi>60?'red':''}">
+            ${fmt(s.rsi,1)}
+            ${s.rsi<40?"<span style='color:#8b949e;font-size:0.75rem'> oversold</span>":
+              s.rsi>60?"<span style='color:#8b949e;font-size:0.75rem'> overbought</span>":""}
+          </span>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-label">ATR 14</span>
+          <span class="indicator-value">$${fmt(s.atr)}</span>
+        </div>
+      </div>
+
+      <!-- Params -->
+      <div class="card">
+        <div class="card-title">Strategy Parameters
+          ${params.updated?`<span style="float:right;font-weight:400">Updated ${params.updated}</span>`:""}
+        </div>
+        <div class="param-grid">
+          <div class="param-item">
+            <div class="label">BB Std Dev</div>
+            <div class="value yellow">${params.bb_std || "—"}</div>
+          </div>
+          <div class="param-item">
+            <div class="label">RSI Oversold</div>
+            <div class="value yellow">${params.rsi_oversold || "—"}</div>
+          </div>
+          <div class="param-item">
+            <div class="label">ATR SL Mult</div>
+            <div class="value yellow">${params.atr_sl_mult || "—"}</div>
+          </div>
+          <div class="param-item">
+            <div class="label">Allow Shorts</div>
+            <div class="value ${params.allow_shorts?'green':'red'}">${params.allow_shorts?"Yes":"No"}</div>
+          </div>
+        </div>
+        ${params.test_return != null ? `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #21262d">
+          <div class="indicator-row">
+            <span class="indicator-label">Optimizer Test Return</span>
+            <span class="indicator-value">${pct(params.test_return)}</span>
+          </div>
+          <div class="indicator-row">
+            <span class="indicator-label">Optimizer Test PF</span>
+            <span class="indicator-value">${fmt(params.test_pf)}</span>
+          </div>
+        </div>` : ""}
+      </div>
+
+    </div>
+
+    <!-- Recent Orders (full width) -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Recent Orders (${d.symbol||"GLD"})</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Side</th><th>Qty</th><th>Fill Price</th><th>Time (TH)</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>${orderRows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function load() {
+  try {
+    const r = await fetch(STATUS_URL + "?t=" + Date.now());
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    render(await r.json());
+  } catch (e) {
+    document.getElementById("root").innerHTML =
+      `<div class="error">Could not load status.json<br><small>${e.message}</small><br><br>
+       <small style="color:#8b949e">Make sure GitHub Actions has run at least once and GitHub Pages is enabled.</small></div>`;
+  }
+}
+
+load();
+setInterval(load, 5 * 60 * 1000);  // auto-refresh every 5 min
+</script>
+</body>
+</html>

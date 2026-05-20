@@ -6,6 +6,9 @@ on:
     - cron: '*/15 13-20 * * 1-5'
   workflow_dispatch:  # manual run button in GitHub UI
 
+permissions:
+  contents: write   # needed to commit status.json to GitHub Pages
+
 jobs:
   trade:
     runs-on: ubuntu-latest
@@ -34,3 +37,23 @@ jobs:
           MAX_DAILY_LOSS_PCT: '3.0'
           ALLOW_SHORTS: 'true'
         run: python bot_gha.py
+
+      - name: Update dashboard data
+        env:
+          ALPACA_KEY: ${{ secrets.ALPACA_KEY }}
+          ALPACA_SECRET: ${{ secrets.ALPACA_SECRET }}
+          SYMBOL: GLD
+          TIMEFRAME: H1
+          RISK_PER_TRADE_PCT: '1.0'
+          MAX_DAILY_LOSS_PCT: '3.0'
+          ALLOW_SHORTS: 'true'
+        run: python report_gha.py
+
+      - name: Commit dashboard data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/status.json
+          git diff --staged --quiet || git commit -m "chore: update dashboard $(date -u +%Y-%m-%dT%H:%MZ)"
+          git pull --rebase
+          git push
