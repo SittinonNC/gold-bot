@@ -2,7 +2,10 @@
 
 Alpaca bracket orders handle SL/TP natively, so no state.json needed.
 GitHub Actions cron triggers this every hour Mon-Fri during market hours.
+Reads params.json (written by optimize_gha.py) to use latest tuned parameters.
 """
+import json
+import os
 import sys
 from datetime import datetime, timezone
 
@@ -21,6 +24,21 @@ from alpaca.trading.requests import (
 
 def log(msg: str):
     print(f"[{datetime.now(timezone.utc):%Y-%m-%d %H:%M:%S} UTC] {msg}", flush=True)
+
+
+def load_params(cfg):
+    """Override cfg with optimized params from params.json if available."""
+    if not os.path.exists("params.json"):
+        return cfg
+    with open("params.json") as f:
+        p = json.load(f)
+    for key in ["bb_std", "rsi_oversold", "rsi_overbought", "atr_sl_mult", "allow_shorts"]:
+        if key in p:
+            setattr(cfg, key, p[key])
+    log(f"Loaded params.json ({p.get('updated','?')}): "
+        f"bb_std={cfg.bb_std} rsi_os={cfg.rsi_oversold} "
+        f"atr_sl={cfg.atr_sl_mult} shorts={cfg.allow_shorts}")
+    return cfg
 
 
 def is_market_open() -> bool:
@@ -51,7 +69,7 @@ def bracket_order(cfg, side: str, qty: int, sl_price: float, tp_price: float):
 
 
 def run():
-    cfg = CONFIG
+    cfg = load_params(CONFIG)
     if not broker.connect(cfg):
         log("Could not connect to Alpaca — check secrets. Exiting.")
         sys.exit(1)
