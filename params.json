@@ -1,0 +1,14 @@
+{
+  "bb_std": 2.0,
+  "rsi_oversold": 40,
+  "rsi_overbought": 60,
+  "atr_sl_mult": 0.75,
+  "allow_shorts": true,
+  "train_return": 4.9,
+  "train_pf": 1.64,
+  "train_wr": 27.3,
+  "test_return": 4.73,
+  "test_pf": 1.98,
+  "test_wr": 28.6,
+  "updated": "2026-05-20"
+}
