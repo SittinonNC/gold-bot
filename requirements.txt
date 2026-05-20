@@ -1,0 +1,8 @@
+pandas>=2.0
+numpy>=1.24
+python-dotenv>=1.0
+yfinance>=0.2.40
+# Alpaca paper trading — free, works on macOS. Used by bot.py.
+alpaca-py>=0.33
+# MetaTrader 5 path — Windows only. Used by bot_mt5.py.
+MetaTrader5>=5.0.45 ; platform_system == "Windows"
