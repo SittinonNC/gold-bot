@@ -18,10 +18,11 @@ _trading: TradingClient | None = None
 _data: StockHistoricalDataClient | None = None
 
 _TF = {
+    "M5":  TimeFrame(5,  TimeFrameUnit.Minute),
     "M15": TimeFrame(15, TimeFrameUnit.Minute),
     "M30": TimeFrame(30, TimeFrameUnit.Minute),
-    "H1": TimeFrame(1, TimeFrameUnit.Hour),
-    "D1": TimeFrame(1, TimeFrameUnit.Day),
+    "H1":  TimeFrame(1,  TimeFrameUnit.Hour),
+    "D1":  TimeFrame(1,  TimeFrameUnit.Day),
 }
 
 
