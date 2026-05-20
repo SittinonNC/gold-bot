@@ -1,0 +1,36 @@
+name: Gold Bot (Paper Trading)
+
+on:
+  schedule:
+    # Every hour Mon-Fri 13:30-20:30 UTC = 9:30am-4:30pm ET (US market hours)
+    - cron: '30 13-20 * * 1-5'
+  workflow_dispatch:  # manual run button in GitHub UI
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run bot (one-shot)
+        env:
+          ALPACA_KEY: ${{ secrets.ALPACA_KEY }}
+          ALPACA_SECRET: ${{ secrets.ALPACA_SECRET }}
+          SYMBOL: GLD
+          TIMEFRAME: H1
+          RISK_PER_TRADE_PCT: '1.0'
+          MAX_DAILY_LOSS_PCT: '3.0'
+          ALLOW_SHORTS: 'true'
+        run: python bot_gha.py
