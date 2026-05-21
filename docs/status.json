@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-21 18:22:10 UTC",
+  "updated": "2026-05-21 20:23:16 UTC",
   "symbol": "GLD",
   "timeframe": "H1",
   "account": {
@@ -10,13 +10,13 @@
   },
   "position": null,
   "signal": {
-    "price": 418.02,
-    "bb_lower": 409.58,
-    "bb_mid": 414.4,
-    "bb_upper": 419.22,
-    "ema200": 424.49,
-    "rsi": 55.5,
-    "atr": 2.11,
+    "price": 416.94,
+    "bb_lower": 409.78,
+    "bb_mid": 414.71,
+    "bb_upper": 419.63,
+    "ema200": 424.06,
+    "rsi": 52.1,
+    "atr": 2.08,
     "long_entry": false,
     "short_entry": false
   },
