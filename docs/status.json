@@ -1,21 +1,21 @@
 {
-  "updated": "2026-05-29 19:36:37 UTC",
+  "updated": "2026-05-29 21:29:01 UTC",
   "symbol": "GLD",
   "timeframe": "H1",
   "account": {
-    "equity": 100180.78,
-    "buying_power": 105911.61,
-    "pnl_today": 180.78,
-    "pnl_today_pct": 0.18
+    "equity": 100445.22,
+    "buying_power": 106704.94,
+    "pnl_today": 445.22,
+    "pnl_today_pct": 0.45
   },
   "position": {
     "symbol": "GLD",
     "side": "short",
     "qty": -226.0,
     "entry_price": 418.72,
-    "current_price": 417.92,
-    "unrealized_pl": 180.78,
-    "unrealized_plpc": 0.19
+    "current_price": 416.75,
+    "unrealized_pl": 445.22,
+    "unrealized_plpc": 0.47
   },
   "signal": {
     "price": 418.04,
@@ -30,11 +30,27 @@
   },
   "recent_orders": [
     {
+      "side": "buy",
+      "qty": 226.0,
+      "filled_price": null,
+      "filled_at": null,
+      "status": "expired",
+      "order_class": "bracket"
+    },
+    {
       "side": "sell",
       "qty": 226.0,
       "filled_price": 418.72,
       "filled_at": "2026-05-29T16:50:58.138571+00:00",
       "status": "filled",
+      "order_class": "bracket"
+    },
+    {
+      "side": "buy",
+      "qty": 226.0,
+      "filled_price": null,
+      "filled_at": null,
+      "status": "canceled",
       "order_class": "bracket"
     }
   ],
