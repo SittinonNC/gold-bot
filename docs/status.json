@@ -1,30 +1,30 @@
 {
-  "updated": "2026-06-05 18:14:04 UTC",
+  "updated": "2026-06-05 20:18:01 UTC",
   "symbol": "GLD",
   "timeframe": "H1",
   "account": {
-    "equity": 104840.88,
-    "buying_power": 239783.92,
-    "pnl_today": 3157.22,
-    "pnl_today_pct": 3.1
+    "equity": 105089.48,
+    "buying_power": 312908.48,
+    "pnl_today": 3405.82,
+    "pnl_today_pct": 3.35
   },
   "position": {
     "symbol": "GLD",
     "side": "short",
     "qty": -226.0,
     "entry_price": 418.72,
-    "current_price": 397.3,
-    "unrealized_pl": 4840.92,
-    "unrealized_plpc": 5.12
+    "current_price": 396.2,
+    "unrealized_pl": 5089.52,
+    "unrealized_plpc": 5.38
   },
   "signal": {
-    "price": 398.48,
-    "bb_lower": 394.96,
-    "bb_mid": 407.4,
-    "bb_upper": 419.85,
-    "ema200": 417.44,
-    "rsi": 27.9,
-    "atr": 2.1,
+    "price": 396.87,
+    "bb_lower": 393.16,
+    "bb_mid": 406.86,
+    "bb_upper": 420.56,
+    "ema200": 417.22,
+    "rsi": 25.8,
+    "atr": 2.13,
     "long_entry": false,
     "short_entry": false
   },
