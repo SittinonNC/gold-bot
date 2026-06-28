@@ -4,11 +4,11 @@
   "rsi_overbought": 60,
   "atr_sl_mult": 0.75,
   "allow_shorts": true,
-  "train_return": 14.89,
-  "train_pf": 2.61,
-  "train_wr": 35.7,
-  "test_return": 7.96,
-  "test_pf": 3.66,
-  "test_wr": 40.0,
-  "updated": "2026-06-14"
+  "train_return": 9.59,
+  "train_pf": 2.2,
+  "train_wr": 33.3,
+  "test_return": 15.42,
+  "test_pf": 5.96,
+  "test_wr": 50.0,
+  "updated": "2026-06-28"
 }
