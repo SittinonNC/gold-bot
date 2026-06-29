@@ -1,30 +1,30 @@
 {
-  "updated": "2026-06-26 21:07:42 UTC",
+  "updated": "2026-06-29 16:40:21 UTC",
   "symbol": "GLD",
   "timeframe": "H1",
   "account": {
-    "equity": 109878.42,
-    "buying_power": 337810.97,
-    "pnl_today": -1254.3,
-    "pnl_today_pct": -1.13
+    "equity": 111236.68,
+    "buying_power": 344873.92,
+    "pnl_today": 1046.38,
+    "pnl_today_pct": 0.95
   },
   "position": {
     "symbol": "GLD",
     "side": "short",
     "qty": -226.0,
     "entry_price": 418.72,
-    "current_price": 375.01,
-    "unrealized_pl": 9878.46,
-    "unrealized_plpc": 10.44
+    "current_price": 369.0,
+    "unrealized_pl": 11236.72,
+    "unrealized_plpc": 11.87
   },
   "signal": {
-    "price": 373.27,
-    "bb_lower": 361.6,
-    "bb_mid": 370.07,
-    "bb_upper": 378.55,
-    "ema200": 393.32,
-    "rsi": 49.8,
-    "atr": 2.06,
+    "price": 369.5,
+    "bb_lower": 364.19,
+    "bb_mid": 371.03,
+    "bb_upper": 377.87,
+    "ema200": 392.53,
+    "rsi": 39.9,
+    "atr": 2.09,
     "long_entry": false,
     "short_entry": false
   },
@@ -60,12 +60,12 @@
     "rsi_overbought": 60,
     "atr_sl_mult": 0.75,
     "allow_shorts": true,
-    "train_return": 14.89,
-    "train_pf": 2.61,
-    "train_wr": 35.7,
-    "test_return": 7.96,
-    "test_pf": 3.66,
-    "test_wr": 40.0,
-    "updated": "2026-06-14"
+    "train_return": 9.59,
+    "train_pf": 2.2,
+    "train_wr": 33.3,
+    "test_return": 15.42,
+    "test_pf": 5.96,
+    "test_wr": 50.0,
+    "updated": "2026-06-28"
   }
 }
